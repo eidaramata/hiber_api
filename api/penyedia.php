@@ -37,11 +37,11 @@ function login() {
 
         $db = getDB();
         $userData ='';
-        $sql = "SELECT rf_user.username, user_role.role, rf_user.password FROM rf_user INNER JOIN user_role ON rf_user.username = user_role.username WHERE rf_user.username=:username AND rf_user.password=:password";
+        $sql = "SELECT rf_user.username, user_role.role, rf_user.password FROM rf_user INNER JOIN user_role ON rf_user.username = user_role.username WHERE rf_user.username=:username AND rf_user.password=:password user_role.role = 'pengguna'";
         //$sql = "SELECT id_rf_user, username FROM rf_user WHERE username=:username and password=:password ";
         $stmt = $db->prepare($sql);
         $stmt->bindParam("username", $username, PDO::PARAM_STR);
-        //$password=hash('sha256',$password);
+        $password=hash('sha256',$password);
         $stmt->bindParam("password", $password, PDO::PARAM_STR);
         $stmt->execute();
         $mainCount=$stmt->rowCount();
@@ -78,7 +78,7 @@ function signup() {
     $mPhone=$data->mPhone;
     $email=$data->email;
     $password=$data->password;
-    $role = "pengguna";
+    $role = "penyedia";
     try {
 
         $username_check = preg_match('~^[A-Za-z0-9_]{3,20}$~i', $username);
@@ -154,10 +154,10 @@ function internalUserDetails($input) {
         $usernameDetails = $stmt->fetch(PDO::FETCH_OBJ);
         $usernameDetails->token = apiToken($usernameDetails->username);
         $db = null;
-        //return $usernameDetails;
-        var_dump($usernameDetails);
-        // $usernameDetails = json_encode($usernameDetails );
-        //echo '{"userData": ' .$usernameDetails . '}';
+        return $usernameDetails;
+        //var_dump($usernameDetails);
+        /*$usernameDetails = json_encode($usernameDetails);
+        echo '{"userData": ' .$usernameDetails . '}';*/
 
 
     } catch(PDOException $e) {

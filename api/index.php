@@ -37,11 +37,12 @@ function login() {
 
         $db = getDB();
         $userData ='';
-        $sql = "SELECT rf_user.username, user_role.role, rf_user.password FROM rf_user INNER JOIN user_role ON rf_user.username = user_role.username WHERE rf_user.username=:username AND rf_user.password=:password";
-        //$sql = "SELECT id_rf_user, username FROM rf_user WHERE username=:username and password=:password ";
+        $sql = "SELECT rf_user.username, user_role.role, rf_user.password FROM rf_user INNER JOIN user_role ON rf_user.username = user_role.username WHERE rf_user.username=:username AND rf_user.password=:password AND  user_role.role = 'pengguna'" ;
+      //  $sql = "SELECT id_rf_user, username, password FROM rf_user WHERE username=:username and password=:password ";
         $stmt = $db->prepare($sql);
         $stmt->bindParam("username", $username, PDO::PARAM_STR);
-        //$password=hash('sha256',$password);
+        $password=hash('sha256',$password);
+        //var_dump($password1);
         $stmt->bindParam("password", $password, PDO::PARAM_STR);
         $stmt->execute();
         $mainCount=$stmt->rowCount();
@@ -154,8 +155,8 @@ function internalUserDetails($input) {
         $usernameDetails = $stmt->fetch(PDO::FETCH_OBJ);
         $usernameDetails->token = apiToken($usernameDetails->username);
         $db = null;
-        //return $usernameDetails;
-        var_dump($usernameDetails);
+        return $usernameDetails;
+      //  var_dump($usernameDetails);
         // $usernameDetails = json_encode($usernameDetails );
         //echo '{"userData": ' .$usernameDetails . '}';
 
@@ -364,7 +365,9 @@ function proyekbaru (){
   $token=$data->token;
   $db = getDB();
   /*$sql = "SELECT pesanan.createdby, pesanan.id_order, pesanan_output.id_order, pesanan_output.output FROM pesanan INNER JOIN pesanan_output WHERE pesanan.createdby = '$username' AND pesanan.id_order = pesanan_output.id_order ORDER BY pesanan.id_order DESC";*/
-  $sql = "SELECT * FROM pesanan  WHERE createdby = '$username' ORDER BY id_order DESC";
+  /*$sql = "SELECT * FROM pesanan  WHERE createdby = '$username' ORDER BY id_order DESC";*/
+  $sql = "SELECT pesanan.subject, pesanan.dtprojectstart, pesanan.dtprojectend, pesanan.projecttype, pesanan.dtcreated, pesanan.createdby, pesanan.id_order, order_status.id_order, order_status.status
+  FROM pesanan INNER JOIN order_status WHERE pesanan.createdby = '$username' AND pesanan.id_order = order_status.id_order AND order_status.status = 'new'";
   $result = $db->query($sql);
   $proyekBaru = $result->fetchAll(PDO::FETCH_OBJ);
   $db = null;
