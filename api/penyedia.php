@@ -36,8 +36,8 @@ function login() {
     try {
 
         $db = getDB();
-        $userData ='';
-        $sql = "SELECT rf_user.username, user_role.role, rf_user.password FROM rf_user INNER JOIN user_role ON rf_user.username = user_role.username WHERE rf_user.username=:username AND rf_user.password=:password user_role.role = 'pengguna'";
+        $penyediaData ='';
+        $sql = "SELECT rf_user.username, user_role.role, rf_user.password FROM rf_user INNER JOIN user_role ON rf_user.username = user_role.username WHERE rf_user.username=:username AND rf_user.password=:password AND user_role.role = 'penyedia'";
         //$sql = "SELECT id_rf_user, username FROM rf_user WHERE username=:username and password=:password ";
         $stmt = $db->prepare($sql);
         $stmt->bindParam("username", $username, PDO::PARAM_STR);
@@ -45,19 +45,19 @@ function login() {
         $stmt->bindParam("password", $password, PDO::PARAM_STR);
         $stmt->execute();
         $mainCount=$stmt->rowCount();
-        $userData = $stmt->fetch(PDO::FETCH_OBJ);
-        if(!empty($userData))
+        $penyediaData = $stmt->fetch(PDO::FETCH_OBJ);
+        if(!empty($penyediaData))
         {
             $username=$userData->username;
-            $userData->token = apiToken($username);
+            $penyediaData->token = apiToken($username);
         }
 
         $db = null;
-         if($userData){
-               $userData = json_encode($userData);
+         if($penyediaData){
+               $penyediaData = json_encode($penyediaData);
 
 
-               echo '{"userData": ' .$userData . '}';
+               echo '{"penyediaData": ' .$penyediaData . '}';
             } else {
                echo '{"text":"Bad request wrong username and password"}';
             }
@@ -117,7 +117,7 @@ function signup() {
                 $stmt2->bindParam("role", $role,PDO::PARAM_STR);
                 $stmt2->execute();
 
-                $userData=internalUserDetails($username);
+                $penyediarData=internalUserDetails($username);
 
             }
 
@@ -125,9 +125,9 @@ function signup() {
             $db = null;
 
 
-            if($userData){
-               $userData = json_encode($userData);
-                echo '{"userData": ' .$userData . '}';
+            if($penyediaData){
+               $penyediaData = json_encode($penyediaData);
+                echo '{"penyediaData": ' .$penyediaData . '}';
             } else {
                echo '{"text":"Username atau Email sudah digunakan"}';
             }
