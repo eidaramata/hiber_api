@@ -118,10 +118,7 @@ function signup() {
                 $stmt2->execute();
 
                 $penyediarData=internalUserDetails($username);
-
             }
-
-
             $db = null;
 
 

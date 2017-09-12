@@ -7,22 +7,11 @@ $app = new \Slim\Slim();
 
 $app->post('/login','login'); /* User login */
 $app->post('/signup','signup'); /* User Signup  */
-$app->post('/tes','tes');
 $app->post('/project', 'project'); // Send Project
-$app->post('/polygon', 'polygon'); // Send Project
-$app->post('/ambil', 'ambil'); // Send Project
+$app->post('/polygon', 'polygon'); // Get Polygon
 $app->post('/proyekbaru', 'proyekbaru'); // Send Project
-
-
-
-
-$app->get('/internalUserDetails/:args','internalUserDetails'); /*  */
-
-//$app->post('/userDetails','userDetails'); /* User Details */
-
 $app->run();
 
-/************************* USER LOGIN *************************************/
 /* ### User login ### */
 function login() {
 
@@ -56,8 +45,6 @@ function login() {
         $db = null;
          if($userData){
                $userData = json_encode($userData);
-
-
                echo '{"userData": ' .$userData . '}';
             } else {
                echo '{"text":"Bad request wrong username and password"}';
@@ -167,41 +154,6 @@ function internalUserDetails($input) {
 
 }
 
-function tes(){
-    $request = \Slim\Slim::getInstance()->request();
-    $data = json_decode($request->getBody());
-    $username=$data->username;
-    $token=$data->token;
-
-    $systemToken=apiToken($username);
-    //var_dump($systemToken);
-    try {
-
-        if($systemToken == $token){
-            $feedData = '';
-            $db = getDB();
-            $sql = "SELECT * FROM user_role WHERE username=:username";
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam("username", $username, PDO::PARAM_STR);
-            $stmt->execute();
-            $feedData = $stmt->fetch(PDO::FETCH_OBJ);
-          //  $feedData2 = $feedData->username;
-
-            $db = null;
-            $feedData = json_encode($feedData);
-          //  $test = $feedData->username;
-            echo '{"Data": ' . $feedData . '}';
-        } else{
-            echo '{"error":{"text":"No access"}}';
-        }
-
-    } catch(PDOException $e) {
-        echo '{"error":{"text":'. $e->getMessage() .'}}';
-    }
-
-
-
-}
 function project(){
     $request = \Slim\Slim::getInstance()->request();
     $data = json_decode($request->getBody());
@@ -312,10 +264,9 @@ function polygon (){
   $username=$data->username;
   $id_order=$data->id_order;
   $token=$data->token;
-
-
   $db = getDB();
-
+  $systemToken=apiToken($username);
+  if($systemToken == $token){
   $sql = "SELECT id_order, latitude, longitude FROM order_location WHERE id_order=$id_order";
   $result = $db->query($sql);
 
@@ -324,10 +275,6 @@ function polygon (){
   $longitude [] =  $row["longitude"]; }
   $string = implode(",", $latitude);
   $string2 = implode(",", $longitude);
-
-  //var_dump( $comma_separated );
-  //$comma_separatedd = explode(" ", $comma_separated );
-  //var_dump( $comma_separatedd );
 
   $polygon = json_encode($string);
   $polygon2 = json_encode($string2);
@@ -342,36 +289,28 @@ function polygon (){
    $hasil = json_encode($output);
   }
   echo '{"latitude":' .$polygon .', "longitude" : '.$polygon2.', "output": ' . $hasil . '}';
-
+  }
 }
 
-function ambil (){
-  $request = \Slim\Slim::getInstance()->request();
-  $data = json_decode($request->getBody());
-  $username=$data->username;
-  $token=$data->token;
-  $db = getDB();
-  $sql = "SELECT * FROM pesanan WHERE createdby = '$username'";
-  $result = $db->query($sql);
-  $feedData = $result->fetchAll(PDO::FETCH_OBJ);
-  $db = null;
-  echo '{"feedData": ' . json_encode($feedData) . '}';
-}
 
+ // ADD PROYEK BARU
 function proyekbaru (){
   $request = \Slim\Slim::getInstance()->request();
   $data = json_decode($request->getBody());
   $username=$data->username;
   $token=$data->token;
   $db = getDB();
+  $systemToken=apiToken($username);
+  if($systemToken == $token){
   /*$sql = "SELECT pesanan.createdby, pesanan.id_order, pesanan_output.id_order, pesanan_output.output FROM pesanan INNER JOIN pesanan_output WHERE pesanan.createdby = '$username' AND pesanan.id_order = pesanan_output.id_order ORDER BY pesanan.id_order DESC";*/
   /*$sql = "SELECT * FROM pesanan  WHERE createdby = '$username' ORDER BY id_order DESC";*/
   $sql = "SELECT pesanan.subject, pesanan.dtprojectstart, pesanan.dtprojectend, pesanan.projecttype, pesanan.dtcreated, pesanan.createdby, pesanan.id_order, order_status.id_order, order_status.status
-  FROM pesanan INNER JOIN order_status WHERE pesanan.createdby = '$username' AND pesanan.id_order = order_status.id_order AND order_status.status = 'new'";
+  FROM pesanan INNER JOIN order_status ON pesanan.id_order = order_status.id_order WHERE pesanan.createdby = '$username' AND order_status.status = 'new'";
   $result = $db->query($sql);
   $proyekBaru = $result->fetchAll(PDO::FETCH_OBJ);
   $db = null;
   echo '{"proyekBaru": ' . json_encode($proyekBaru) . '}';
+  }
 }
 
 ?>
