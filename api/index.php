@@ -10,6 +10,7 @@ $app->post('/signup','signup'); /* User Signup  */
 $app->post('/project', 'project'); // Send Project
 $app->post('/polygon', 'polygon'); // Get Polygon
 $app->post('/proyekbaru', 'proyekbaru'); // Send Project
+$app->post('/cekorder', 'cekorder'); // Cek Order
 $app->run();
 
 /* ### User login ### */
@@ -229,7 +230,7 @@ function project(){
             $sql2 = "INSERT INTO pesanan_output (id_order, output) VALUES ($id_order, '$value')";
             $db->query($sql2); }
 
-
+            // INSERT TO ORDER STATUS
             $sql3 = "INSERT INTO order_status (id_order, status, changed_by, dtadded) VALUES ($id_order, 'new', '$username', NOW())";
             $db->query($sql3);
 
@@ -313,4 +314,29 @@ function proyekbaru (){
   }
 }
 
+
+function cekorder(){
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  $username=$data->username;
+  $token=$data->token;
+  $date = date("Ymd");
+  $db = getDB();
+  $sql = "SELECT max(subject) AS last FROM pesanan WHERE subject LIKE '$date%'";
+  $result = $db->query($sql);
+  $row = $result->fetch(PDO::FETCH_ASSOC);
+  //var_dump($row);
+  if($row['last'] == NULL ){
+    $date = date("Ymd")."_1";
+    echo '{"date": ' . json_encode($date) . '}';
+    }else{
+    $date = $row['last'];
+    $lastNoUrut = substr($date, 8, 2);
+    $lastNoUrut2 = ltrim($lastNoUrut,"_");
+    $nextNoUrut = $lastNoUrut2 + 1;
+    $newdate = date("Ymd")."_".$nextNoUrut;
+    echo '{"date": ' . json_encode($newdate) . '}';
+  }
+
+}
 ?>
